@@ -2,96 +2,121 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin – Paniers HarmonyShop</title>
+  <title>Admin HarmonyShop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       font-family: sans-serif;
-      background: #f8f8f8;
+      padding: 1rem;
       margin: 0;
-      padding: 2rem;
+      background: #f9f9f9;
     }
     h1 {
-      text-align: center;
-      color: #00796b;
+      margin-bottom: 1rem;
     }
-    .filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      justify-content: center;
-      margin-bottom: 2rem;
+    .filters, .export-bar, #stats {
+      margin-bottom: 1rem;
+      background: #fff;
+      padding: 1rem;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
-    input[type="text"], input[type="date"], button {
+    input, select, button {
       padding: 0.5rem;
-      border-radius: 4px;
-      border: 1px solid #ccc;
+      margin-right: 0.5rem;
       font-size: 1rem;
     }
     .panier {
       background: #fff;
-      margin: 1rem auto;
-      padding: 1rem 1.5rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
       border-radius: 6px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      max-width: 700px;
+      border: 1px solid #ddd;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
-    .panier h2 {
-      margin-bottom: 0.3rem;
-    }
-    .panier time {
-      font-size: 0.9rem;
-      color: #666;
-    }
-    ul {
-      margin-top: 0.5rem;
-      padding-left: 1.2rem;
-    }
-    .export-btn {
-      display: block;
-      margin: 1rem auto;
+    ul { margin: 0; padding-left: 1.2rem; }
+    #notif {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
       background: #00796b;
       color: white;
-      border: none;
-      padding: 0.6rem 1rem;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 1rem;
+      padding: 0.8rem 1.5rem;
+      border-radius: 6px;
+      font-weight: bold;
+      z-index: 1000;
     }
-    .export-btn:hover {
-      background: #005c50;
+    @media (max-width: 600px) {
+      .panier { font-size: 0.95rem; }
+      input, select, button { width: 100%; margin-bottom: 0.5rem; }
+    }
+    body.dark {
+      background: #121212;
+      color: #f5f5f5;
+    }
+    body.dark .panier,
+    body.dark .filters,
+    body.dark .export-bar,
+    body.dark #stats {
+      background: #1e1e1e;
+      color: #eee;
+      border-color: #333;
+    }
+    body.dark button, body.dark input {
+      background: #2a2a2a;
+      color: #eee;
+      border: 1px solid #444;
     }
   </style>
 </head>
 <body>
-  <h1>📋 Paniers enregistrés</h1>
+  <h1>🛍️ Panneau d’administration HarmonyShop</h1>
 
-  <div class="filters">
-    <input type="text" id="search" placeholder="🔍 Filtrer par prénom…" />
-    <input type="date" id="date-filter" />
-    <button class="export-btn" onclick="exportCSV()">⬇️ Exporter en CSV</button>
+  <div id="stats">
+    <h2>📊 Statistiques</h2>
+    <ul>
+      <li>Nombre total de paniers : <strong id="stat-total">–</strong></li>
+      <li>Articles totaux : <strong id="stat-articles">–</strong></li>
+      <li>Montant cumulé : <strong id="stat-somme">–</strong> €</li>
+      <li>Panier moyen : <strong id="stat-moyenne">–</strong> €</li>
+    </ul>
   </div>
 
-  <div id="panier-list"></div>
+  <div class="filters">
+    <input id="filterPseudo" placeholder="Filtrer par prénom…" />
+    <input id="filterDate" type="date" />
+    <button onclick="applyFilters()">🔎 Filtrer</button>
+  </div>
+
+  <div class="export-bar">
+    <button onclick="exportCSV()">⬇️ Export CSV</button>
+    <button style="background:#c62828;" onclick="deleteAll()">🧹 Tout supprimer</button>
+  </div>
+
+  <div id="list"></div>
+
+  <div id="notif">✅ Panier supprimé</div>
 
   <script>
     let paniers = [];
 
-    function formatDate(iso) {
-      const d = new Date(iso);
-      return d.toLocaleString("fr-FR");
+    fetch("/api/paniers")
+      .then(res => res.json())
+      .then(data => {
+        paniers = data.reverse();
+        applyFilters();
+      });
+
+    function formatDate(d) {
+      return new Date(d).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" });
     }
 
-    function display(filtered) {
-      const container = document.getElementById("panier-list");
-      container.innerHTML = "";
-
-      if (filtered.length === 0) {
-        container.innerHTML = "<p style='text-align:center;'>Aucun panier trouvé.</p>";
-        return;
-      }
-
-      filtered.forEach(entry => {
+    function display(data) {
+      const list = document.getElementById("list");
+      list.innerHTML = "";
+      data.forEach((entry, index) => {
         const div = document.createElement("div");
         div.className = "panier";
         div.innerHTML = `
@@ -100,55 +125,84 @@
           <ul>
             ${entry.panier.map(p => `<li>${p.quantity}× ${p.name} – ${p.price} €</li>`).join("")}
           </ul>
+          <button onclick="deletePanier(${index})">🗑️ Supprimer</button>
         `;
-        container.appendChild(div);
+        list.appendChild(div);
       });
+      updateStats(data);
+    }
+
+    function applyFilters() {
+      const pseudo = document.getElementById("filterPseudo").value.toLowerCase();
+      const dateVal = document.getElementById("filterDate").value;
+      const filtered = paniers.filter(p =>
+        (!pseudo || p.pseudo.toLowerCase().includes(pseudo)) &&
+        (!dateVal || p.date.slice(0, 10) === dateVal)
+      );
+      display(filtered);
+    }
+
+    function updateStats(data) {
+      let total = data.length, articles = 0, montant = 0;
+      data.forEach(p =>
+        p.panier.forEach(i => {
+          articles += i.quantity;
+          montant += i.quantity * i.price;
+        })
+      );
+      document.getElementById("stat-total").textContent = total;
+      document.getElementById("stat-articles").textContent = articles;
+      document.getElementById("stat-somme").textContent = montant.toFixed(2);
+      document.getElementById("stat-moyenne").textContent = total ? (montant / total).toFixed(2) : "0.00";
+    }
+
+    function deletePanier(index) {
+      if (!confirm("Supprimer ce panier ?")) return;
+      fetch(`/api/panier/${index}`, { method: "DELETE" })
+        .then(() => {
+          paniers.splice(index, 1);
+          applyFilters();
+          showNotification("✅ Panier supprimé");
+        });
+    }
+
+    function deleteAll() {
+      const pass = prompt("Tape 'CONFIRMER' pour tout supprimer.");
+      if (pass !== "CONFIRMER") return;
+      fetch("/api/paniers-reset", { method: "DELETE" })
+        .then(() => {
+          paniers = [];
+          applyFilters();
+          showNotification("🧹 Tous les paniers supprimés");
+        });
     }
 
     function exportCSV() {
-      const header = "Pseudo,Nom produit,Quantité,Prix,Date";
-      const rows = [];
-
-      filteredPaniers.forEach(entry => {
-        entry.panier.forEach(p => {
-          rows.push([entry.pseudo, p.name, p.quantity, p.price, entry.date].join(","));
+      const rows = [["Nom", "Date", "Article", "Quantité", "Prix"]];
+      paniers.forEach(p => {
+        p.panier.forEach(i => {
+          rows.push([p.pseudo, p.date, i.name, i.quantity, i.price]);
         });
       });
-
-      const blob = new Blob([header + "\n" + rows.join("\n")], { type: "text/csv" });
+      const csv = rows.map(r => r.join(";")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = "paniers.csv";
       a.click();
-      URL.revokeObjectURL(url);
     }
 
-    function applyFilters() {
-      const search = document.getElementById("search").value.toLowerCase();
-      const date = document.getElementById("date-filter").value;
-
-      filteredPaniers = paniers.filter(entry => {
-        const matchPseudo = entry.pseudo.toLowerCase().includes(search);
-        const matchDate = date ? entry.date.startsWith(date) : true;
-        return matchPseudo && matchDate;
-      });
-
-      display(filteredPaniers);
+    function showNotification(msg) {
+      const n = document.getElementById("notif");
+      n.textContent = msg;
+      n.style.display = "block";
+      setTimeout(() => { n.style.display = "none"; }, 2000);
     }
 
-    let filteredPaniers = [];
-
-    fetch("/paniers.json")
-      .then(res => res.json())
-      .then(data => {
-        paniers = data.reverse();
-        filteredPaniers = paniers;
-        display(filteredPaniers);
-      });
-
-    document.getElementById("search").addEventListener("input", applyFilters);
-    document.getElementById("date-filter").addEventListener("change", applyFilters);
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      document.body.classList.add("dark");
+    }
   </script>
 </body>
 </html>
