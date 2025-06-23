@@ -119,7 +119,7 @@
     }
   </style>
   <link rel="manifest" href="/manifest.json" />
-<meta name="theme-color" content="#00796b" />
+  <meta name="theme-color" content="#00796b" />
 </head>
 <body>
   <header>
@@ -161,9 +161,14 @@
   </main>
 
   <button id="dark-toggle" title="Changer thème">🌙</button>
+
   <script>
     const token = localStorage.getItem("token");
     if (!token) location.href = "login.html";
+
+    const API_BASE = location.hostname.includes("localhost")
+      ? "http://localhost:3000"
+      : "https://harmonystore-server.onrender.com";
 
     const toggleBtn = document.getElementById("dark-toggle");
     const saved = localStorage.getItem("theme");
@@ -215,7 +220,6 @@
         pagDiv.appendChild(btn);
       }
 
-      // Statistiques
       document.getElementById("stat-count").textContent = paniersFiltrés.length;
       const uniques = [...new Set(paniersFiltrés.map(p => p.pseudo))];
       document.getElementById("stat-clients").textContent = uniques.length;
@@ -224,7 +228,6 @@
       );
       document.getElementById("stat-total").textContent = total.toFixed(2) + " €";
 
-      // Chart
       updateChart(paniersFiltrés);
     }
 
@@ -236,7 +239,8 @@
     document.getElementById("export-csv").addEventListener("click", () => {
       const rows = [["Client", "Date", "Total (€)"]];
       allPaniers.forEach(p => {
-        const d = new Date(p.date).toLocaleString();
+        const d = new
+         Date(p.date).toLocaleString();
         const total = p.panier.reduce((s, a) => s + a.price * a.quantity, 0);
         rows.push([p.pseudo, d, total.toFixed(2)]);
       });
@@ -256,7 +260,7 @@
         const montant = p.panier.reduce((s, a) => s + a.price * a.quantity, 0);
         ventesParHeure[heure] = (ventesParHeure[heure] || 0) + montant;
       });
-      const heures = Object.keys(ventesParHeure).sort((a,b)=>a-b);
+      const heures = Object.keys(ventesParHeure).sort((a, b) => a - b);
       const montants = heures.map(h => ventesParHeure[h]);
 
       if (myChart) myChart.destroy();
@@ -279,7 +283,7 @@
       });
     }
 
-    fetch("http://localhost:3000/api/paniers", {
+    fetch(`${API_BASE}/api/paniers`, {
       headers: { Authorization: "Bearer " + token }
     })
       .then(r => {
@@ -295,12 +299,13 @@
         setTimeout(() => location.href = "login.html", 1500);
       });
   </script>
+
   <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/service-worker.js').then(() =>
-      console.log("✅ Service worker enregistré !")
-    );
-  }
-</script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js').then(() =>
+        console.log("✅ Service worker enregistré !")
+      );
+    }
+  </script>
 </body>
 </html>
