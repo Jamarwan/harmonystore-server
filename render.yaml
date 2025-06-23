@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: harmonystore-admin
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    branch: main
+    envVars:
+      - key: JWT_SECRET
+        value: ta-cle-ultra-secrete-ici
