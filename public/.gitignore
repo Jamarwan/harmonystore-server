@@ -1,0 +1,21 @@
+# Node.js
+node_modules/
+.env
+package-lock.json
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Build/déploiement (si tu utilises un bundler plus tard)
+dist/
+build/
+
+# Éditeur (VS Code, etc.)
+.vscode/
+.idea/
