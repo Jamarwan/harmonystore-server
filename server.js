@@ -1,77 +1,76 @@
-// server.js
+const express = require("express");
+const cors = require("cors");
+const jwt = require("jsonwebtoken");
+const path = require("path");
 require("dotenv").config();
-const express = require('express');
-const cors = require('cors');
-const jwt = require('jsonwebtoken');
-const bodyParser = require('body-parser');
 
 const app = express();
-const PORT = 3000;
-const SECRET = 'ma_super_cle_secrete'; // À stocker dans une variable d'environnement en production
 
+// Middleware
 app.use(cors());
-app.use(bodyParser.json());
-
-// Exemple de données privées
-let paniers = [
-  { pseudo: 'Alice', date: '2025-06-22T15:00:00', panier: [{ name: 'Bol', price: 12, quantity: 2, category: 'Céramique' }] },
-  { pseudo: 'Bob', date: '2025-06-22T16:45:00', panier: [{ name: 'Vase', price: 25, quantity: 1, category: 'Verre' }] },
-];
-
-// Middleware de vérification de token
-function authMiddleware(req, res, next) {
-  const token = req.headers['authorization']?.split(' ')[1];
-  if (!token) return res.status(401).json({ error: 'Token manquant' });
-
-  jwt.verify(token, SECRET, (err, decoded) => {
-    if (err) return res.status(403).json({ error: 'Token invalide' });
-    req.user = decoded;
-    next();
-  });
-}
-
-// Route d’authentification
-app.post('/api/login', (req, res) => {
-  const { username, password } = req.body;
-  // À remplacer par une vraie base de données
-  if (username === 'admin' && password === 'admin123') {
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "2h" });
-    jwt.verify(token, process.env.JWT_SECRET);
-    res.json({ token });
-  } else {
-    res.status(401).json({ error: 'Identifiants invalides' });
-  }
-});
-
-// Routes protégées
-app.get('/api/paniers', authMiddleware, (req, res) => {
-  res.json(paniers);
-});
-
-app.delete('/api/panier/:index', authMiddleware, (req, res) => {
-  const index = parseInt(req.params.index);
-  if (index >= 0 && index < paniers.length) {
-    paniers.splice(index, 1);
-    res.json({ success: true });
-  } else {
-    res.status(404).json({ error: 'Panier introuvable' });
-  }
-});
-
-app.delete('/api/paniers-reset', authMiddleware, (req, res) => {
-  paniers = [];
-  res.json({ message: 'Base vidée' });
-});
+app.use(express.json());
 app.use(express.static("public"));
 
-app.get("/", (req, res) => {
-  res.redirect("/login.html");
+// 🔐 Login (auth simplifiée)
+app.post("/api/login", (req, res) => {
+  const { username, password } = req.body;
+
+  // Ex : admin/admin123 (à remplacer plus tard par une vraie BDD)
+  if (username === "admin" && password === "admin123") {
+    const payload = { username }; // ✅ corrigé ici
+    const secret = process.env.JWT_SECRET || "dev-secret";
+    const token = jwt.sign(payload, secret, { expiresIn: "1h" });
+    res.json({ token });
+  } else {
+    res.status(401).json({ error: "Identifiants invalides." });
+  }
 });
 
+// ✅ Route protégée : paniers
+app.get("/api/paniers", (req, res) => {
+  const auth = req.headers.authorization;
+  const token = auth && auth.split(" ")[1];
+  const secret = process.env.JWT_SECRET || "dev-secret";
+
+  if (!token) {
+    return res.status(401).json({ error: "Token manquant" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, secret);
+
+    // Exemples de paniers fictifs (à remplacer par données BDD plus tard)
+    const fakePaniers = [
+      {
+        pseudo: "alice",
+        date: new Date(),
+        panier: [
+          { name: "T-shirt", quantity: 2, price: 15 },
+          { name: "Casquette", quantity: 1, price: 10 },
+        ],
+      },
+      {
+        pseudo: "bob",
+        date: new Date(),
+        panier: [
+          { name: "Sweat", quantity: 1, price: 35 },
+        ],
+      },
+    ];
+
+    res.json(fakePaniers);
+  } catch (err) {
+    res.status(403).json({ error: "Token invalide" });
+  }
+});
+
+// 🚫 Fallback 404 vers ta page personnalisée
 app.use((req, res) => {
-  res.status(404).sendFile(__dirname + "/public/404.html");
+  res.status(404).sendFile(path.join(__dirname, "public", "404.html"));
 });
 
+// 🚀 Démarrage
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Serveur lancé sur http://localhost:${PORT}`);
+  console.log(`✅ Serveur démarré sur http://localhost:${PORT}`);
 });
