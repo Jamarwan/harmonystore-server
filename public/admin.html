@@ -6,86 +6,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="assets/favicon.ico" />
   <link rel="stylesheet" href="css/style.css" />
-
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    /* NAVIGATION RESPONSIVE */
-    .nav-toggle { display: none; }
-    .nav-toggle-label {
-      font-size: 2rem;
-      cursor: pointer;
-      display: none;
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      z-index: 1001;
-      color: #00796b;
-    }
-    .nav-toggle-label.close { display: none; }
-    .nav-links {
-      display: flex;
-      list-style: none;
-      gap: 1rem;
-    }
-    .nav-links li a {
-      text-decoration: none;
-      color: inherit;
-      font-weight: 500;
-    }
-    .nav-overlay { display: none; }
-
-    @media (max-width: 768px) {
-      .nav-toggle-label.open,
-      .nav-toggle-label.close { display: block; }
-      .nav-links {
-        flex-direction: column;
-        position: fixed;
-        top: 0;
-        right: 0;
-        background: #fff;
-        width: 75%;
-        height: 100vh;
-        padding: 5rem 1rem 2rem;
-        transform: translateX(100%);
-        transition: transform 0.4s ease;
-        box-shadow: -2px 0 8px rgba(0,0,0,0.1);
-        z-index: 1000;
-      }
-      .nav-toggle:checked ~ nav .nav-links {
-        transform: translateX(0);
-      }
-      .nav-toggle:checked ~ .nav-toggle-label.close {
-        display: block;
-      }
-      .nav-toggle:checked ~ .nav-toggle-label.open {
-        display: none;
-      }
-      .nav-toggle:checked ~ .nav-overlay {
-        display: block;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 500;
-      }
-    }
-
-    /* DARK MODE */
-    :root {
-      --bg: #fff;
-      --text: #000;
-    }
-    body.dark-mode {
-      --bg: #121212;
-      --text: #f1f1f1;
-    }
     body {
-      background: var(--bg);
-      color: var(--text);
-      margin: 0;
       font-family: sans-serif;
+      margin: 0;
+      background-color: var(--bg, #fff);
+      color: var(--text, #000);
     }
-    header, footer {
-      background: var(--bg);
-      color: var(--text);
+    header {
+      padding: 1rem;
+      background: var(--bg, #fff);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    h1 { margin: 0; }
+    #logout-btn {
+      padding: 0.4rem 1rem;
+      background: #c62828;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
     }
     #dark-toggle {
       position: fixed;
@@ -100,73 +43,264 @@
       height: 2.8rem;
       cursor: pointer;
       z-index: 1001;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .data-panel {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+    }
+    .stat-box {
+      flex: 1 1 30%;
+      background: #f0f0f0;
+      padding: 1rem;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .panel-tools {
+      display: flex;
+      justify-content: space-between;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .panel-tools input {
+      flex: 1;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    .panel-tools button {
+      padding: 0.5rem 1rem;
+      background: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    ul.paniers {
+      list-style: none;
+      padding: 0;
+    }
+    ul.paniers li {
+      padding: 0.5rem;
+      border-bottom: 1px solid #ccc;
+    }
+    .pagination {
+      text-align: center;
+      margin-top: 1rem;
+    }
+    .pagination button {
+      margin: 0 0.25rem;
+      padding: 0.4rem 0.7rem;
+    }
+    canvas {
+      max-width: 100%;
+      margin-top: 2rem;
+    }
+
+    body.dark-mode {
+      background: #121212;
+      color: #f1f1f1;
+    }
+    body.dark-mode header {
+      background: #1e1e1e;
+    }
+    body.dark-mode .stat-box {
+      background: #2a2a2a;
+    }
+    body.dark-mode #logout-btn {
+      background: #a51212;
     }
   </style>
+  <link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#00796b" />
 </head>
-
 <body>
   <header>
-    <div class="container header-container">
-      <a href="/" class="logo">Harmony<span>Shop</span></a>
-
-      <input type="checkbox" id="nav-toggle" class="nav-toggle" />
-      <label for="nav-toggle" class="nav-toggle-label open">☰</label>
-      <label for="nav-toggle" class="nav-toggle-label close">❌</label>
-      <div class="nav-overlay"></div>
-
-      <nav>
-        <ul class="nav-links">
-          <li><a href="/">Accueil</a></li>
-          <li><a href="/boutique.html">Boutique</a></li>
-          <li><a href="/about.html">À propos</a></li>
-          <li><a href="/contact.html">Contact</a></li>
-        </ul>
-      </nav>
-    </div>
+    <h1>Admin HarmonyShop</h1>
+    <button id="logout-btn">🔓 Déconnexion</button>
   </header>
 
-  <main class="container">
-    <h1>Panneau d’administration</h1>
+  <main class="data-panel">
+    <section class="stats">
+      <div class="stat-box">
+        <h3>🧾 Paniers</h3>
+        <p id="stat-count">–</p>
+      </div>
+      <div class="stat-box">
+        <h3>👤 Clients</h3>
+        <p id="stat-clients">–</p>
+      </div>
+      <div class="stat-box">
+        <h3>💶 Total</h3>
+        <p id="stat-total">–</p>
+      </div>
+    </section>
 
-        <!-- Panneaux de stats, filtres, liste, etc. -->
-    <div id="stats"></div>
-    <div class="filters"></div>
-    <div id="list"></div>
+    <section class="panel-tools">
+      <input type="text" id="search" placeholder="Rechercher un client…" />
+      <button id="export-csv">📥 Export CSV</button>
+    </section>
+
+    <section>
+      <h2>📦 Commandes</h2>
+      <ul id="paniers" class="paniers">Chargement…</ul>
+      <div class="pagination" id="pagination"></div>
+    </section>
+
+    <section>
+      <h2>📈 Statistiques graphiques</h2>
+      <canvas id="chart-ventes" height="100"></canvas>
+    </section>
   </main>
 
   <button id="dark-toggle" title="Changer thème">🌙</button>
-
   <script>
+    const token = localStorage.getItem("token");
+    if (!token) location.href = "login.html";
+
     const toggleBtn = document.getElementById("dark-toggle");
     const saved = localStorage.getItem("theme");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-
     if (saved === "dark" || (!saved && prefersDark)) {
       document.body.classList.add("dark-mode");
       toggleBtn.textContent = "🌞";
     }
-
     toggleBtn.addEventListener("click", () => {
       const isDark = document.body.classList.toggle("dark-mode");
       toggleBtn.textContent = isDark ? "🌞" : "🌙";
       localStorage.setItem("theme", isDark ? "dark" : "light");
     });
 
-    // 🔁 Exemple de script dynamique (à compléter avec tes fonctions de dashboard)
-    document.addEventListener("DOMContentLoaded", () => {
-      const stats = document.getElementById("stats");
-      const filters = document.querySelector(".filters");
-      const list = document.getElementById("list");
-
-      // Exemple : chargement simulé
-      stats.innerHTML = `<h2>📊 Statistiques</h2><p>Chargement...</p>`;
-      filters.innerHTML = `
-        <input type="text" placeholder="Filtrer..." />
-        <button>Filtrer</button>
-      `;
-      list.innerHTML = `<p>Aucune donnée pour l’instant.</p>`;
+    document.getElementById("logout-btn").addEventListener("click", () => {
+      localStorage.removeItem("token");
+      location.href = "login.html";
     });
+
+    let allPaniers = [];
+    let currentPage = 1;
+    const itemsPerPage = 5;
+
+    function afficherPaniers() {
+      const search = document.getElementById("search").value.toLowerCase();
+      const paniersFiltrés = allPaniers.filter(p =>
+        p.pseudo.toLowerCase().includes(search)
+      );
+      const paginés = paniersFiltrés.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+      const ul = document.getElementById("paniers");
+      ul.innerHTML = paginés.map(p => {
+        const date = new Date(p.date).toLocaleString();
+        const total = p.panier.reduce((s, a) => s + a.price * a.quantity, 0);
+        return `<li><strong>${p.pseudo}</strong> – ${date}<br>Total : ${total.toFixed(2)} €</li>`;
+      }).join("") || "<li>Aucune commande.</li>";
+
+      const nbPages = Math.ceil(paniersFiltrés.length / itemsPerPage);
+      const pagDiv = document.getElementById("pagination");
+      pagDiv.innerHTML = "";
+      for (let i = 1; i <= nbPages; i++) {
+        const btn = document.createElement("button");
+        btn.textContent = i;
+        if (i === currentPage) btn.disabled = true;
+        btn.onclick = () => {
+          currentPage = i;
+          afficherPaniers();
+        };
+        pagDiv.appendChild(btn);
+      }
+
+      // Statistiques
+      document.getElementById("stat-count").textContent = paniersFiltrés.length;
+      const uniques = [...new Set(paniersFiltrés.map(p => p.pseudo))];
+      document.getElementById("stat-clients").textContent = uniques.length;
+      const total = paniersFiltrés.reduce((s, p) =>
+        s + p.panier.reduce((t, a) => t + a.price * a.quantity, 0), 0
+      );
+      document.getElementById("stat-total").textContent = total.toFixed(2) + " €";
+
+      // Chart
+      updateChart(paniersFiltrés);
+    }
+
+    document.getElementById("search").addEventListener("input", () => {
+      currentPage = 1;
+      afficherPaniers();
+    });
+
+    document.getElementById("export-csv").addEventListener("click", () => {
+      const rows = [["Client", "Date", "Total (€)"]];
+      allPaniers.forEach(p => {
+        const d = new Date(p.date).toLocaleString();
+        const total = p.panier.reduce((s, a) => s + a.price * a.quantity, 0);
+        rows.push([p.pseudo, d, total.toFixed(2)]);
+      });
+      const csv = rows.map(r => r.join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "commandes.csv";
+      a.click();
+    });
+
+    let myChart;
+    function updateChart(paniers) {
+      const ventesParHeure = {};
+      paniers.forEach(p => {
+        const heure = new Date(p.date).getHours();
+        const montant = p.panier.reduce((s, a) => s + a.price * a.quantity, 0);
+        ventesParHeure[heure] = (ventesParHeure[heure] || 0) + montant;
+      });
+      const heures = Object.keys(ventesParHeure).sort((a,b)=>a-b);
+      const montants = heures.map(h => ventesParHeure[h]);
+
+      if (myChart) myChart.destroy();
+      const ctx = document.getElementById("chart-ventes").getContext("2d");
+      myChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: heures.map(h => `${h}h`),
+          datasets: [{
+            label: "Revenus par heure",
+            data: montants,
+            backgroundColor: "#00796b"
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    fetch("http://localhost:3000/api/paniers", {
+      headers: { Authorization: "Bearer " + token }
+    })
+      .then(r => {
+        if (!r.ok) throw new Error("Token invalide");
+        return r.json();
+      })
+      .then(data => {
+        allPaniers = data;
+        afficherPaniers();
+      })
+      .catch(() => {
+        document.getElementById("paniers").innerHTML = "<li>Erreur de sécurité. Redirection…</li>";
+        setTimeout(() => location.href = "login.html", 1500);
+      });
   </script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js').then(() =>
+      console.log("✅ Service worker enregistré !")
+    );
+  }
+</script>
 </body>
 </html>

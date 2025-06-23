@@ -2,89 +2,48 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Connexion – HarmonyShop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="assets/favicon.ico" />
   <link rel="stylesheet" href="css/style.css" />
 
   <style>
-    /* MENU + DARK MODE */
-    .nav-toggle { display: none; }
-    .nav-toggle-label {
-      font-size: 2rem;
-      cursor: pointer;
-      display: none;
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      z-index: 1001;
-      color: #00796b;
-    }
-    .nav-toggle-label.close { display: none; }
-    .nav-links {
-      display: flex;
-      list-style: none;
-      gap: 1rem;
-    }
-    .nav-links li a {
-      text-decoration: none;
-      color: inherit;
-      font-weight: 500;
-    }
-    .nav-overlay { display: none; }
-
-    @media (max-width: 768px) {
-      .nav-toggle-label.open,
-      .nav-toggle-label.close { display: block; }
-      .nav-links {
-        flex-direction: column;
-        position: fixed;
-        top: 0;
-        right: 0;
-        background: #fff;
-        width: 75%;
-        height: 100vh;
-        padding: 5rem 1rem 2rem;
-        transform: translateX(100%);
-        transition: transform 0.4s ease;
-        box-shadow: -2px 0 8px rgba(0,0,0,0.1);
-        z-index: 1000;
-      }
-      .nav-toggle:checked ~ nav .nav-links {
-        transform: translateX(0);
-      }
-      .nav-toggle:checked ~ .nav-toggle-label.close {
-        display: block;
-      }
-      .nav-toggle:checked ~ .nav-toggle-label.open {
-        display: none;
-      }
-      .nav-toggle:checked ~ .nav-overlay {
-        display: block;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 500;
-      }
-    }
-
-    :root {
-      --bg: #fff;
-      --text: #000;
-    }
-    body.dark-mode {
-      --bg: #121212;
-      --text: #f1f1f1;
-    }
     body {
-      background: var(--bg);
-      color: var(--text);
-      margin: 0;
       font-family: sans-serif;
+      margin: 0;
+      background-color: var(--bg, #fff);
+      color: var(--text, #000);
     }
-    header, footer {
-      background: var(--bg);
-      color: var(--text);
+    .login-container {
+      max-width: 400px;
+      margin: 4rem auto;
+      padding: 2rem;
+      background: #f5f5f5;
+      border-radius: 8px;
+    }
+    .login-container h1 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .login-container input {
+      width: 100%;
+      padding: 0.7rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .login-container button {
+      width: 100%;
+      padding: 0.7rem;
+      background-color: #00796b;
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .login-container button:hover {
+      background-color: #005f56;
     }
     #dark-toggle {
       position: fixed;
@@ -101,43 +60,15 @@
       z-index: 1001;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
-    .login-container {
-      max-width: 400px;
-      margin: 4rem auto;
-      padding: 2rem;
-      background: #f5f5f5;
-      border-radius: 8px;
-    }
-    .login-container h1 {
-      margin-bottom: 1.5rem;
-      text-align: center;
-    }
-    .login-container input {
-      width: 100%;
-      padding: 0.7rem;
-      margin-bottom: 1rem;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .login-container button {
-      width: 100%;
-      padding: 0.7rem;
-      background: #00796b;
-      color: white;
-      border: none;
-      font-size: 1rem;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .login-container button:hover {
-      background: #005f56;
+    body.dark-mode {
+      background-color: #121212;
+      color: #f1f1f1;
     }
     body.dark-mode .login-container {
-      background: #1e1e1e;
+      background-color: #1e1e1e;
     }
-    body.dark-mode .login-container input {
-      background: #2a2a2a;
+    body.dark-mode input {
+      background-color: #2a2a2a;
       color: #eee;
       border: 1px solid #444;
     }
@@ -145,40 +76,20 @@
 </head>
 
 <body>
-  <header>
-    <div class="container header-container">
-      <a href="/" class="logo">Harmony<span>Shop</span></a>
-
-      <input type="checkbox" id="nav-toggle" class="nav-toggle" />
-      <label for="nav-toggle" class="nav-toggle-label open">☰</label>
-      <label for="nav-toggle" class="nav-toggle-label close">❌</label>
-      <div class="nav-overlay"></div>
-
-      <nav>
-        <ul class="nav-links">
-          <li><a href="/">Accueil</a></li>
-          <li><a href="/boutique.html">Boutique</a></li>
-          <li><a href="/about.html">À propos</a></li>
-          <li><a href="/contact.html">Contact</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
-
-  <main>
-    <div class="login-container">
-      <h1>Connexion Admin</h1>
-      <form method="POST" action="/login">
-        <input type="text" name="username" placeholder="Nom d’utilisateur" required />
-        <input type="password" name="password" placeholder="Mot de passe" required />
-        <button type="submit">Se connecter</button>
-      </form>
-    </div>
-  </main>
+  <div class="login-container">
+    <h1>Connexion Admin</h1>
+    <form id="login-form">
+      <input type="text" id="username" placeholder="Nom d’utilisateur" required />
+      <input type="password" id="password" placeholder="Mot de passe" required />
+      <button type="submit">Se connecter</button>
+    </form>
+    <p id="error" style="color:red; text-align:center; margin-top:1rem;"></p>
+  </div>
 
   <button id="dark-toggle" title="Changer thème">🌙</button>
 
   <script>
+    // Mode sombre
     const toggleBtn = document.getElementById("dark-toggle");
     const saved = localStorage.getItem("theme");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -192,6 +103,34 @@
       const isDark = document.body.classList.toggle("dark-mode");
       toggleBtn.textContent = isDark ? "🌞" : "🌙";
       localStorage.setItem("theme", isDark ? "dark" : "light");
+    });
+
+    // Connexion
+    const form = document.getElementById("login-form");
+    const error = document.getElementById("error");
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+
+      fetch("http://localhost:3000/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.token) {
+            localStorage.setItem("token", data.token);
+            window.location.href = "admin.html";
+          } else {
+            error.textContent = data.error || "Échec de la connexion.";
+          }
+        })
+        .catch(() => {
+          error.textContent = "Erreur de connexion au serveur.";
+        });
     });
   </script>
 </body>
