@@ -62,6 +62,15 @@ app.delete('/api/paniers-reset', authMiddleware, (req, res) => {
   paniers = [];
   res.json({ message: 'Base vidée' });
 });
+app.use(express.static("public"));
+
+app.get("/", (req, res) => {
+  res.redirect("/login.html");
+});
+
+app.use((req, res) => {
+  res.status(404).sendFile(__dirname + "/public/404.html");
+});
 
 app.listen(PORT, () => {
   console.log(`✅ Serveur lancé sur http://localhost:${PORT}`);

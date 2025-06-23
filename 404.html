@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>404 – Page introuvable</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      padding: 4rem 1rem;
+      background-color: #fafafa;
+      color: #333;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background-color: #121212;
+        color: #eee;
+      }
+      a {
+        color: #66d9ef;
+      }
+    }
+
+    h1 {
+      font-size: 6rem;
+      margin-bottom: 1rem;
+      animation: float 2s ease-in-out infinite;
+    }
+
+    p {
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    a {
+      color: #00796b;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+  </style>
+</head>
+<body>
+    <svg viewBox="0 0 100 100" width="150" height="150" style="margin: 2rem auto; display:block;">
+  <circle cx="50" cy="50" r="45" stroke="#00796b" stroke-width="5" fill="none" stroke-dasharray="282" stroke-dashoffset="0">
+    <animateTransform attributeName="transform" type="rotate"
+      from="0 50 50" to="360 50 50"
+      dur="5s" repeatCount="indefinite"/>
+  </circle>
+</svg>
+  <h1>404</h1>
+  <p>Oops… Cette page n’existe pas 😕</p>
+  <p><a href="/login.html">Revenir à la page de connexion</a></p>
+</body>
+</html>
